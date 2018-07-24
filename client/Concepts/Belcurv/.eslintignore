@@ -1,5 +1,0 @@
-# Ignore built files
-dist/bundle.js
-
-# ignore node_modules obviously
-node_modules
