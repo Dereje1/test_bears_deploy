@@ -14,6 +14,6 @@ module.exports = {
   SCREEN_UPDATE: 'SCREEN_UPDATE',
   RAISE_FLOOR: 'RAISE_FLOOR',
   COLLISION: 'COLLISION',
-  serverUrl: () => process.env.SERVER_URL || 'http://localhost:5000',
-  clientUrl: () => process.env.CLIENT_URL || 'http://localhost:3000',
+  serverUrl: () => process.env.SERVER_URL || 'https://bears5.glitch.me/',
+  clientUrl: () => process.env.CLIENT_URL || 'https://bears5.glitch.me/',
 };
