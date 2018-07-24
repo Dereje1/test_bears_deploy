@@ -160,7 +160,7 @@ class Opponent extends React.Component {
         ],
       }
       : null;
-    let startCounter = 60;
+    let startCounter = 10;
     const gameEndId = setInterval(() => {
       this.setState({
         status: ['GameOver', isWinner],
