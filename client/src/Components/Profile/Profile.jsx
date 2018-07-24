@@ -35,11 +35,11 @@ class Profile extends React.Component {
                 <ul className="profile__card-list">
                   {
                     stats.spStats.last_ten_games.map(game => (
-                      <li key={game.date}>
+                      <li key={game._id}>
                         <p>
                           Score: { game.score }
                           <span className="profile__card-date">
-                            ({ new Date(game.date).toLocaleDateString() })
+                            ({ new Date(game.ts).toLocaleDateString() })
                           </span>
                         </p>
                       </li>
@@ -62,11 +62,11 @@ class Profile extends React.Component {
                         ? `You beat ${loser.name}`
                         : `You lost to ${winner.name}`;
                       return (
-                        <li key={game.date}>
+                        <li key={game._id}>
                           <p>
                             { text } on level { game.difficulty }
                             <span className="profile__card-date">
-                              ({ new Date(game.date).toLocaleDateString() })
+                              ({ new Date(game.ts).toLocaleDateString() })
                             </span>
                           </p>
                         </li>);

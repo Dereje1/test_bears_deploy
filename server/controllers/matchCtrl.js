@@ -43,7 +43,7 @@ const getPlayersBestScores = (req, res, next) => {
  * Example: GET >> /api/my_stats
  * Secured: yes
  * Expects:
- *    1) req.user._id      {String}   Player's user _id
+ *    1) req.user._id      {Object}   Player's user _id as Mongo ObjectID
  * Returns: JSON object of single player high/low scores, games played, and
  *    multiplayer games played, wins/losses
 */
@@ -53,11 +53,8 @@ const getUsersOwnStats = (req, res, next) => {
   }
   const playerId = req.user._id;
 
-  return Promise.all([
-    Match.getOwnSPStats(playerId),
-    Match.getOwnMPStats(playerId),
-  ])
-    .then(([spStats, mpStats]) => res.json({ spStats, mpStats }))
+  return Match.getOwnStats(playerId)
+    .then(stats => res.json(stats))
     .catch(err => next(err));
 };
 

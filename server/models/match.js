@@ -113,70 +113,71 @@ matchSchema.statics.getOwnRecentMatches = function getOwnRecentMatches(
   ]);
 };
 
-matchSchema.statics.getOwnSPStats = function getOwnSPStats(player) {
-  return this.aggregate([
-    { $match: { 'players._id': ObjectId(player), multiPlayer: false } },
-    { $unwind: '$players' },
-    { $sort: { ts: -1 } },
-    {
-      $group: {
-        _id: null,
-        games_played: { $sum: 1 },
-        best_score: { $max: '$players.score' },
-        worst_score: { $min: '$players.score' },
-        matches: { $push: { score: '$players.score', date: '$ts' } },
-      },
-    },
-    {
-      $project: {
-        _id: 0,
-        last_ten_games: { $slice: ['$matches', 10] },
-        games_played: 1,
-        best_score: 1,
-        worst_score: 1,
-      },
-    },
-  ])
-    .then(results => results[0]);
-};
+matchSchema.statics.getOwnStats = function getOwnMPStats(player) {
+  return this
+    .find(
+      { 'players._id': player },
+      { __v: 0 },
+    )
+    .sort({ ts: -1 })
+    .then((docs) => {
+      const initialSpStats = {
+        games_played: 0,
+        best_score: null,
+        worst_score: null,
+        last_ten_games: [],
+      };
 
-matchSchema.statics.getOwnMPStats = function getOwnMPStats(player) {
-  const getGamesWon = this.count({
-    multiPlayer: true,
-    players: { $elemMatch: { _id: player, winner: true } },
-  });
+      const initialMpStats = {
+        games_played: 0,
+        games_won: 0,
+        games_lost: 0,
+        last_ten_games: [],
+      };
 
-  const getRestStats = this.aggregate([
-    { $match: { 'players._id': ObjectId(player), multiPlayer: true } },
-    { $sort: { ts: -1 } },
-    {
-      $group: {
-        _id: null,
-        games_played: { $sum: 1 },
-        matches: {
-          $push: {
-            players: '$players',
-            date: '$ts',
-            difficulty: '$difficulty',
-          },
-        },
-      },
-    },
-    {
-      $project: {
-        _id: 0,
-        last_ten_games: { $slice: ['$matches', 10] },
-        games_played: 1,
-      },
-    },
-  ]);
+      const spStats = docs.reduce((acc, doc) => {
+        const p = doc.players[0];
+        if (doc.multiPlayer === false) {
+          acc.games_played += 1;
 
-  return Promise.all([getGamesWon, getRestStats])
-    .then(([gamesWon, restStats]) => ({
-      ...restStats[0],
-      games_won: gamesWon,
-      games_lost: restStats[0].games_played - gamesWon,
-    }));
+          acc.best_score = (p.score > acc.best_score)
+            ? p.score
+            : acc.best_score;
+
+          acc.worst_score = (!acc.worst_score || p.score < acc.worst_score)
+            ? p.score
+            : acc.worst_score;
+
+          if (acc.last_ten_games.length < 10) {
+            acc.last_ten_games.push({
+              _id: doc._id,
+              ts: doc.ts,
+              score: doc.players[0].score,
+            });
+          }
+        }
+        return acc;
+      }, initialSpStats);
+
+      const mpStats = docs.reduce((acc, doc) => {
+        if (doc.multiPlayer === true) {
+          acc.games_played += 1;
+
+          if (doc.players.some(p => p._id.equals(player) && p.winner)) {
+            acc.games_won += 1;
+          } else {
+            acc.games_lost += 1;
+          }
+
+          if (acc.last_ten_games.length < 10) {
+            acc.last_ten_games.push(doc);
+          }
+        }
+        return acc;
+      }, initialMpStats);
+
+      return { spStats, mpStats };
+    });
 };
 
 
