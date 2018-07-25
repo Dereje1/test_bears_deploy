@@ -45,7 +45,7 @@ const Controls = (props) => {
       />
       <button className="buttonmulti-single" onClick={props.onMultiPlayer()}>Single Player</button>
       <label htmlFor="test">Lines Cleared = {props.game.points.totalLinesCleared}</label>
-      <label htmlFor="test">Difficulty = {2}</label>
+      <label htmlFor="test">Difficulty = {props.difficulty}</label>
     </div>
 
   );
@@ -59,6 +59,7 @@ Controls.defaultProps = {
   onCanvas: null,
   onMultiPlayer: null,
   multiPlayer: false,
+  difficulty: 2,
 };
 Controls.propTypes = {
   onReset: PropTypes.func,
@@ -68,5 +69,6 @@ Controls.propTypes = {
   game: PropTypes.objectOf(PropTypes.any),
   onCanvas: PropTypes.objectOf(PropTypes.any),
   multiPlayer: PropTypes.bool,
+  difficulty: PropTypes.number,
 };
 export default Controls;

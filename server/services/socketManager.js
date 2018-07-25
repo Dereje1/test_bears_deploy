@@ -36,8 +36,8 @@ module.exports = (socket) => {
     io.emit('CURRENT_POOL', profileResponder(socket.id));
   });
 
-  socket.on('INVITATION_SENT', (sId) => {
-    io.to(sId).emit('INVITATION_RECEIVED', socket.id);
+  socket.on('INVITATION_SENT', (invitation) => {
+    io.to(invitation.hostSocketId).emit('INVITATION_RECEIVED', { hostSocketId: socket.id, difficulty: invitation.difficulty });
   });
 
   socket.on('INVITATION_ACCEPTED', (players) => {

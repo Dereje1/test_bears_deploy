@@ -249,11 +249,11 @@ class Demo extends React.Component {
     await this.props.actions.pause(!this.props.game.paused);
   }
 
-  floorRaise = async () => {
+  floorRaise = async (f) => {
     this.endTick(false, 'floor raise');
     this.canvasMajor.current.focus();
     clearCanvas(this.canvasContextMajor, this.props.game, true); // clear canvasMajor
-    await this.props.actions.raiseFloor(this.props.game.rubble);
+    await this.props.actions.raiseFloor(this.props.game.rubble, f);
     // const makeNewShape = !!this.state.multiPlayer;
     this.startTick(false);
   }
@@ -273,10 +273,11 @@ class Demo extends React.Component {
   /* opponent component Callbacks */
   handleMultiplayer = () => {
     if (this.props.user.authenticated) {
-      this.resetBoard(false);
+      clearCanvas(this.canvasContextMajor, this.props.game, true); // clear canvasMajor
+      clearCanvas(this.canvasContextMinor, this.props.game, true); // clear canvasMajor
       this.setState({
         multiPlayer: !this.state.multiPlayer,
-      });// don't forget to add reset board call back here
+      }, () => this.resetBoard(false));// don't forget to add reset board call back here
     } else {
       window.location = '/login';
     }
@@ -303,8 +304,9 @@ class Demo extends React.Component {
         <div className="democontainer">
           <Controls
             onCanvas={this.canvasMinor}
-            onReset={() => this.resetBoard()}
             game={this.props.game}
+            difficulty={this.state.difficulty}
+            onReset={() => this.resetBoard()}
             onhandlePause={() => this.handlePause}
             onFloorRaise={() => this.floorRaise()}
             multiPlayer={this.state.multiPlayer}
@@ -322,8 +324,10 @@ class Demo extends React.Component {
             <Opponent
               onReset={reStart => this.resetBoard(reStart)}
               onGameEmit={toSocket => this.gameEmit(toSocket)}
-              onFloorRaise={() => this.floorRaise()}
+              onFloorRaise={f => this.floorRaise(f)}
               onGameOver={db => this.gameOver(db)}
+              onSetDifficulty={d => this.setState({ difficulty: d })}
+              onClearCanvas={() => clearCanvas(this.canvasContextMajor, this.props.game)}
               difficulty={this.state.difficulty}
             />
             :

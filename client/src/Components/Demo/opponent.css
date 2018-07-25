@@ -86,14 +86,23 @@
     height: 100%;
     font-size:18 px;
     font-weight: 900;
+    color:white;
 }
 
 .winner{
-    color: rgb(11, 165, 50);
+    background: rgb(23, 165, 30);
+    animation-name: flash;
+    animation-duration: 1s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
 }
 
 .looser{
-    color: rgb(212, 10, 10);
+    background:  rgb(212, 10, 10);
+    animation-name: flash;
+    animation-duration: 1s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
 }
 
 .loading{
@@ -121,4 +130,9 @@
       transform: rotate(720deg) scale(1);
     }
   }
-  
+
+  @keyframes flash {
+    50%{
+      background: white;
+    }
+  }
