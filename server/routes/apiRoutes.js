@@ -6,6 +6,7 @@ const {
   getLeaderboard,
   getPlayersBestScores,
   getUsersOwnStats,
+  saveMatch,
 } = require('../controllers/matchCtrl');
 const { seedMatches } = require('../controllers/dbSeed');
 
@@ -46,6 +47,8 @@ router.get('/leaderboard', getLeaderboard);
 router.get('/best_scores', getPlayersBestScores);
 
 router.get('/my_stats', isLoggedIn, getUsersOwnStats);
+
+router.post('/save_match', saveMatch);
 
 // Development route - seeds DB with fake matches
 router.get('/seed_matches', seedMatches);

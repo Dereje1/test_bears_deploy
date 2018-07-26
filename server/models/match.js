@@ -180,6 +180,12 @@ matchSchema.statics.getOwnStats = function getOwnMPStats(player) {
     });
 };
 
+matchSchema.statics.saveMatch = function saveMatch(match) {
+  /**
+   * ADD CUSTOM VALIDATION HERE
+   */
+  return this.create(match);
+};
 
 /* ================================ EXPORTS ================================ */
 

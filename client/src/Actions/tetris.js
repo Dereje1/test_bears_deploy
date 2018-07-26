@@ -2,7 +2,7 @@ import {
   INITIALIZE_GAME, LEVEL_UP, PAUSE,
   GET_NEXT_SHAPE, SCREEN_UPDATE, RAISE_FLOOR, COLLISION,
 } from '../constants/index';
-
+import axios from 'axios';
 
 const setBoundry = (unitBlockSize, width, height, boundryRowHeight) => {
   const boundry = [];
@@ -128,3 +128,16 @@ export const collide = data => (
     payload: data,
   }
 );
+
+export const upDatedb = matchData => new Promise((resolve, reject) => {
+  axios
+    .post('/api/save_match', matchData)
+    .then(({ data }) => {
+      console.log('Data has been posted succesfully');
+      resolve(data);
+    })
+    .catch((err) => {
+      console.log(`Data has failed to post: ${err}`);
+      reject(err);
+    });
+});

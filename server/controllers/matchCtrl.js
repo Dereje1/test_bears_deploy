@@ -49,12 +49,52 @@ const getPlayersBestScores = (req, res, next) => {
 */
 const getUsersOwnStats = (req, res, next) => {
   if (!req.user || !req.user._id) {
-    return res.status(400).json({ message: 'Missing required parameters.' });
+    return res.status(400).json({ message: 'Authentication required.' });
   }
-  const playerId = req.user._id;
+  const { playerId } = req.user;
 
   return Match.getOwnStats(playerId)
     .then(stats => res.json(stats))
+    .catch(err => next(err));
+};
+
+
+/**
+ * Save a match to the DB
+ * Example: POST >> /api/save_match
+ * Secured: yes
+ * Expects:
+ *    1) req.user._id      {Object}   Player's user _id as Mongo ObjectID
+ *    2) req.body.match    {Object}   Match object of shape:
+ *       {
+ *         difficulty: Number,
+ *         multiPlayer: Boolean,
+ *         players: [
+ *           {
+ *             name: String,
+ *             _id: String,
+ *             score: Number,
+ *             winner: Boolean
+ *           },
+ *           {
+ *             name: String,
+ *             _id: String,
+ *             score: Number,
+ *             winner: Boolean
+ *           }
+ *         ]
+ *       }
+ * Returns: success / error message
+*/
+const saveMatch = (req, res, next) => {
+  if (!req.user || !req.user._id) {
+    return res.status(400).json({ message: 'Authentication required.' });
+  }
+
+  const { match } = req.body;
+
+  return Match.saveMatch(match)
+    .then(result => res.json(result))
     .catch(err => next(err));
 };
 
@@ -65,4 +105,5 @@ module.exports = {
   getLeaderboard,
   getPlayersBestScores,
   getUsersOwnStats,
+  saveMatch,
 };

@@ -34,9 +34,10 @@ class Opponent extends React.Component {
     socket.on('INVITATION_RECEIVED', invitedBy => this.processInvite(invitedBy));
     socket.on('START_GAME', opp => this.processGameStart(opp));
     socket.on(SIMULATE_GAMEPLAY, oppGame => this.processGame(oppGame));
-    socket.on('GAME_OVER', win => this.processGameEnd(win));
+    socket.on('GAME_END', win => this.processGameEnd(win));
   }
   componentDidMount() {
+    this.countGameover = 0;
     socket.emit('PLAYER_JOINED', JSON.stringify(this.props.user));
     console.log('Opponent Mounted!!');
   }
@@ -147,7 +148,7 @@ class Opponent extends React.Component {
         this.setState({
           status: ['Playing', null],
         });
-        this.props.onGameEmit(opp);
+        this.props.onGameEmit({ self: this.state.selfSocketId, opponnent: opp });
         this.props.onReset();
         clearInterval(gameStartId);
       }
@@ -164,13 +165,12 @@ class Opponent extends React.Component {
     this.setState(copyOfState, () => this.setGame());
   }
 
-  processGameEnd = (winnerSocketId) => {
-    this.props.onReset(false);
+  processGameEnd = (isWinner) => {
     this.props.onClearCanvas();
-    clearCanvas(this.canvasOpponentContext, this.state.gameState);
+    this.countGameover += 1;
+    if (this.countGameover > 1) return;
+    // clearCanvas(this.canvasOpponentContext, this.state.gameState);
     // isWinner , true if client won
-    const isWinner = winnerSocketId === this.state.selfSocketId;
-    // entry for database
     const databaseEntry = isWinner ?
       {
         difficulty: this.props.difficulty,
@@ -179,27 +179,31 @@ class Opponent extends React.Component {
           {
             name: this.props.user.displayName,
             _id: this.props.user._id,
-            score: this.props.game.points.totalLinesCleared,
+            score: this.props.game.points.totalLinesCleared * 50,
             winner: isWinner,
           },
           {
             name: this.state.opponent.displayName,
             _id: this.state.opponent._id,
-            score: this.state.gameState.points.totalLinesCleared,
+            score: this.state.gameState.points.totalLinesCleared * 50,
             winner: !isWinner,
           },
         ],
       }
       : null;
+
     let startCounter = 10;
+    this.setState({
+      status: ['GameOver', isWinner],
+    }, () => this.props.onPause(true));
+    console.log(`game over called ${this.countGameover}`);
     const gameEndId = setInterval(() => {
-      this.setState({
-        status: ['GameOver', isWinner],
-      });
       startCounter -= 1;
       if (startCounter <= 0) {
-        this.props.onGameOver(databaseEntry);
+        if (databaseEntry) this.props.onGameOver(databaseEntry);
+        else this.props.onGameOver(null);
         clearInterval(gameEndId);
+        this.props.onReset(false);
       }
     }, 1000);
   };
@@ -348,6 +352,7 @@ Opponent.defaultProps = {
   onGameOver: null,
   onSetDifficulty: null,
   onClearCanvas: null,
+  onPause: null,
   difficulty: 2,
 };
 Opponent.propTypes = {
@@ -360,6 +365,8 @@ Opponent.propTypes = {
   onGameOver: PropTypes.func,
   onSetDifficulty: PropTypes.func,
   onClearCanvas: PropTypes.func,
+  onPause: PropTypes.func,
 };
 
 export default connect(mapStateToProps)(Opponent);
+

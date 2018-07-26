@@ -65,18 +65,20 @@ module.exports = (socket) => {
     io.to(msg.socketId).emit(SIMULATE_GAMEPLAY, msg.gameState); // emit the opponents
   });
 
-  socket.on('GAME_OVER', (winner) => {
+  socket.on('GAME_OVER', () => {
+    // looser is always socketId by nature of the game.
     const playerSetIndex = activePlayers.findIndex(players =>
-      (players[0] === winner || players[1] === winner));
+      (players[0] === socket.id || players[1] === socket.id));
     if (playerSetIndex < 0) return;
-    const looser = activePlayers[playerSetIndex].filter(p =>
-      winner !== p)[0];
 
-    console.log(`winner is ${winner} and looser is ${looser}`);
+    const winner = activePlayers[playerSetIndex].filter(p =>
+      socket.id !== p)[0];
+
     activePlayers.splice(playerSetIndex, 1);
+    console.log(`winner is ${winner} and looser is ${socket.id}`);
 
-    io.to(winner).emit('GAME_OVER', winner); // winner gets true
-    io.to(looser).emit('GAME_OVER', winner);
+    io.to(winner).emit('GAME_END', true); // winner gets true
+    io.to(socket.id).emit('GAME_END', false);
   });
 };
 
