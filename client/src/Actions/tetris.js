@@ -17,7 +17,7 @@ const setBoundry = (unitBlockSize, width, height, boundryRowHeight) => {
 };
 const initialState = { // determine what needs to go into state, a very small portion here
   timerInterval: 700,
-  paused: false,
+  paused: true,
   nextShape: '',
   canvas: {
     canvasMajor: {

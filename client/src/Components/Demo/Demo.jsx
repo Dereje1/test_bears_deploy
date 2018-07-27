@@ -59,7 +59,9 @@ class Demo extends React.Component {
   componentDidUpdate(prevProps) {
     if (Object.keys(prevProps.game).length) {
       if ((this.props.game.points.level !== prevProps.game.points.level) &&
-          (this.props.game.timerInterval > 250) && (!this.state.multiPlayer)) {
+          (this.props.game.timerInterval > 250) &&
+          (!this.state.multiPlayer)
+      ) {
         const l = setTimeout(() => {
           this.endTick(false, 'Level Change');
           this.speedUp();
@@ -88,7 +90,9 @@ class Demo extends React.Component {
     this.canvasContextMajor = canvasMajor.getContext('2d');
     this.canvasContextMinor = canvasMinor.getContext('2d');
     if (this.downInterval) this.endTick(false, 'reset Board');
-    if (reStart) this.startTick();
+    if (reStart) {
+      this.startTick();
+    }
   }
 
   startTick = (makeNewShape = true) => {

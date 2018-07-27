@@ -4,7 +4,7 @@ import './controls.css';
 /* font awesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPowerOff, faPause, faPlay, faUsers, faArrowCircleLeft } from '@fortawesome/free-solid-svg-icons';
+import { faPowerOff, faPause, faPlay, faUsers, faUser } from '@fortawesome/free-solid-svg-icons';
 
 /* adds font awesome icons */
 library.add(faPowerOff, faPause, faPlay);
@@ -19,33 +19,34 @@ const Controls = (props) => {
           height={props.game.canvas.canvasMinor.height}
           tabIndex="0"
         />
-
+        <div className="controls__resetPause">
+          <FontAwesomeIcon
+            className="controls__resetPause__reset"
+            icon={faPowerOff}
+            onClick={() => props.onReset(false)}
+          />
+          {
+            props.game.paused ?
+              <FontAwesomeIcon
+                className="controls__resetPause__play"
+                icon={faPlay}
+                onClick={props.onhandlePause()}
+              />
+              :
+              <FontAwesomeIcon
+                className="controls__resetPause__pause"
+                icon={faPause}
+                onClick={props.onhandlePause()}
+              />
+          }
+        </div>
         <FontAwesomeIcon
-          className="reset"
-          icon={faPowerOff}
-          onClick={() => props.onReset(false)}
-        />
-        <FontAwesomeIcon
-          className="multiplayer"
+          className="controls__multiplayer"
           icon={faUsers}
           onClick={props.onMultiPlayer()}
         />
-        {
-          props.game.paused ?
-            <FontAwesomeIcon
-              className="play"
-              icon={faPlay}
-              onClick={props.onhandlePause()}
-            />
-            :
-            <FontAwesomeIcon
-              className="pause"
-              icon={faPause}
-              onClick={props.onhandlePause()}
-            />
-        }
 
-        <button onClick={() => props.onFloorRaise()}>
+        <button className="controls__raise" onClick={() => props.onFloorRaise()}>
           Raise Floor
         </button>
         <label htmlFor="test">Lines Cleared</label>
@@ -66,8 +67,8 @@ const Controls = (props) => {
         tabIndex="0"
       />
       <FontAwesomeIcon
-        className="multiplayer"
-        icon={faArrowCircleLeft}
+        className="controls__multiplayer"
+        icon={faUser}
         onClick={props.onMultiPlayer()}
       />
       <label htmlFor="test">Lines Cleared</label>
@@ -76,7 +77,7 @@ const Controls = (props) => {
       <label htmlFor="test">{props.difficulty}</label>
       {
         props.socketId ?
-          <label className="socket" htmlFor="test">{props.socketId}</label>
+          <label className="controls__socket" htmlFor="test">{props.socketId}</label>
           :
           null
       }

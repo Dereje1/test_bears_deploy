@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import './opponent.css';
-
+import './opponentdescription.css';
 // connect to redux
 import { connect } from 'react-redux';
 
@@ -11,6 +10,9 @@ import {
 
 import { socket } from '../../Actions/socket';
 import { clearCanvas, drawRuble, drawBoundary, drawCells } from './scripts/canvas';
+
+// custom components
+import OpponentDescription from './opponentInfo';
 
 // reads from store
 const mapStateToProps = state => state;
@@ -55,7 +57,6 @@ class Opponent extends React.Component {
     socket.emit('REMOVE_PLAYER', this.state.selfSocketId);
   }
 
-
   setGame = () => {
     if (Object.keys(this.state.gameState).length) {
       // full deep copy of game state needed as object mutation becomes a problem
@@ -87,18 +88,18 @@ class Opponent extends React.Component {
       });
     }
   }
-  setDifficulty = (e) => {
-    this.props.onSetDifficulty(Number(e.target.value));
+  setDifficulty = (val) => {
+    this.props.onSetDifficulty(val);
   }
 
   processFloorRaise = () => {
     /*
-    Difficulty      player clears          Floors added
-    -------------------------------------------------
-      1               4                        1
-      2               3                        1
-      3               2                        1
-      4               1                        1
+    Difficulty                                 Description
+    -----------------------------------------------------------------------------------
+      1               After player clears 4 rows , floor is raised by 1 row on opponent
+      2               After player clears 3 rows , floor is raised by 1 row on opponent
+      3               After player clears 2 rows , floor is raised by 1 row on opponent
+      4               After player clears 1 row  , floor is raised by 1 row on opponent
     */
     const { totalLinesCleared } = this.state.gameState.points;
     const difficultyMap = [[4, 1], [3, 2], [2, 3], [1, 4]]; // [[level, ]]
@@ -112,7 +113,6 @@ class Opponent extends React.Component {
   }
 
   /* process socket-in-coming below */
-
   processPool = (poolData) => {
     const checkSelfSocketId = this.state.selfSocketId === '' ? poolData.self : this.state.selfSocketId;
     const nonSelfPoolData = poolData.pool.filter(p => p.socketId !== checkSelfSocketId);
@@ -223,115 +223,16 @@ class Opponent extends React.Component {
 
   /* done sockets */
 
-  /* opponent top part of component */
-  opponentDescription = () => {
-    if (this.state.status[0] === 'noopponents' && !Object.keys(this.state.opponent).length) {
-      return (
-        <div className="opponentDescription">
-          <div className="opponentDescription noop">
-            <p className="Invite">No opponents  </p>
-            <p className="Invite">avalilable at</p>
-            <p className="Invite">the moment,</p>
-            <p className="Invite">check back</p>
-            <p className="Invite">later !!</p>
-          </div>
-        </div>
-      );
-    }
-    if (this.state.status[0] === 'opponents') {
-      const players = this.state.playerPool.map(p => (
-        <button
-          className="playersbutton"
-          key={p.socketId}
-          onClick={() => this.requestInvite(p.socketId)}
-        >{p.displayName.split(' ')[0]}
-        </button>));
-      return (
-        <div className="opponentDescription">
-          <div className="opponentDescription Invitation">
-            <p className="Invite">Invite</p>
-            {players}
-            <p className="Invite">Difficulty</p>
-            <select name="difficulty" value={this.props.difficulty} onChange={this.setDifficulty}>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-            </select>
-          </div>
-        </div>
-      );
-    }
-    if (this.state.status[0] === 'Invite') {
-      return (
-        <div className="opponentDescription">
-          <div className="opponentDescription Invitation">
-            <p className="Invite">Invite from</p>
-            <p className="Invite">{this.state.status[1][0].displayName.split(' ')[0]}</p>
-            <p className="Invite">Difficulty = {this.state.status[1][1]}</p>
-            <button className="button-accept-invitation" onClick={() => this.acceptInvite()}>Accept</button>
-            <button className="button-decline-invitation">Decline</button>
-          </div>
-        </div>
-      );
-    }
-    if (this.state.status[0] === 'PreGame') {
-      return ( // to render on game
-        <div className="opponentDescription">
-          <div className="opponentDescription Timer">
-            <h4>GET READY</h4>
-            <h4>TO DUEL WITH:</h4>
-            <p className="countdown">{this.state.opponent.displayName.split(' ')[0]}</p>
-            <p className="countdown">in {this.state.status[1]} s</p>
-          </div>
-        </div>
-      );
-    }
-    if (this.state.status[0] === 'Playing' && Object.keys(this.state.gameState).length) {
-      return ( // to render on game
-        <div className="opponentDescription">
-          <div className="opponentDescription GamePlay">
-            <p className="Invite">{this.state.opponent.displayName.split(' ')[0]}</p>
-            <p className="Invite">Lines Cleared</p>
-            <p className="linescleared">{this.state.gameState.points.totalLinesCleared}</p>
-            <p className="Invite">Games Played</p>
-            <p className="gamesplayed">{this.state.opponent.stats.mpStats.games_played}</p>
-          </div>
-        </div>
-      );
-    }
-    if (this.state.status[0] === 'GameOver') {
-      return this.state.status[1] ?
-        ( // to render on game
-          <div className="opponentDescription">
-            <div className="opponentDescription endGame winner">
-              <p className="winner">Congratulations</p>
-              <p className="winner">You Have Won !!</p>
-            </div>
-          </div>
-        )
-        :
-        ( // to render on game
-          <div className="opponentDescription">
-            <div className="opponentDescription endGame looser">
-              <p className="looser">You Have Lost</p>
-              <p className="looser">This Game, </p>
-              <p className="looser">Better Luck</p>
-              <p className="looser">Next Time !!</p>
-            </div>
-          </div>
-        );
-    }
-    return ( // to render on game
-      <div className="opponentDescription">
-        <div className="loading" />
-      </div>
-    );
-  }
   render() {
     return (
       <div className="opponentContainer">
-        {this.opponentDescription()}
+        <OpponentDescription
+          opponentState={this.state}
+          difficulty={this.props.difficulty}
+          setDifficulty={this.setDifficulty}
+          requestInvite={sId => this.requestInvite(sId)}
+          acceptInvite={() => this.acceptInvite()}
+        />
         <canvas
           ref={this.canvasOpponent}
           width={this.props.game.canvas.canvasMajor.width / 2}
