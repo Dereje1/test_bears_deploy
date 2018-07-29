@@ -99,7 +99,7 @@ Controls.defaultProps = {
   game: {},
   onCanvas: null,
   onMultiPlayer: null,
-  multiPlayer: false,
+  multiPlayer: [],
   difficulty: 2,
   socketId: '',
 };
@@ -110,7 +110,7 @@ Controls.propTypes = {
   onMultiPlayer: PropTypes.func,
   game: PropTypes.objectOf(PropTypes.any),
   onCanvas: PropTypes.objectOf(PropTypes.any),
-  multiPlayer: PropTypes.bool,
+  multiPlayer: PropTypes.arrayOf(PropTypes.bool),
   difficulty: PropTypes.number,
   socketId: PropTypes.string,
 };

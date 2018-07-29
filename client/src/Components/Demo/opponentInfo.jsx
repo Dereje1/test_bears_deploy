@@ -126,13 +126,13 @@ OpponentDescription.defaultProps = {
   setDifficulty: null,
   requestInvite: null,
   acceptInvite: null,
-  difficulty: Number,
+  difficulty: 2,
 };
 OpponentDescription.propTypes = {
   opponentState: PropTypes.objectOf(PropTypes.any),
   setDifficulty: PropTypes.func,
   requestInvite: PropTypes.func,
   acceptInvite: PropTypes.func,
-  difficulty: PropTypes.Number,
+  difficulty: PropTypes.number,
 };
 export default OpponentDescription;

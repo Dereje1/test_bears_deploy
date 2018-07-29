@@ -34,7 +34,7 @@ class Opponent extends React.Component {
 
     socket.on('CURRENT_POOL', pool => this.processPool(pool));
     socket.on('INVITATION_RECEIVED', invitedBy => this.processInvite(invitedBy));
-    socket.on('GAME_DISCONNECTED', () => this.disconnectGame());
+    socket.on('GAME_DISCONNECTED', sId => this.disconnectGame(sId));
     socket.on('START_GAME', opp => this.processGameStart(opp));
     socket.on(SIMULATE_GAMEPLAY, oppGame => this.processGame(oppGame));
     socket.on('GAME_END', win => this.processGameEnd(win));
@@ -60,6 +60,7 @@ class Opponent extends React.Component {
   }
 
   componentWillUnmount() {
+    socket.emit('COMPONENT_UNMOUNTED', 'opponent');
     socket.emit('disconnect', '');
   }
 
@@ -137,7 +138,6 @@ class Opponent extends React.Component {
     console.log('A signal has come in that your Opponent Disconnected the Game!!');
     // add penalty in database for this in the future
     this.props.onGameOver(null);
-    this.props.onReset(false);
   }
 
   processInvite = (host) => {

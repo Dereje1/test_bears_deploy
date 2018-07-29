@@ -48,8 +48,8 @@ class Demo extends React.Component {
       multiPlayer: false,
       disableExit: false,
       difficulty: 2,
-      selfSocketId: false,
-      opponentSocketId: false, // will hold socket to emit game to
+      selfSocketId: '',
+      opponentSocketId: '', // will hold socket to emit game to
     };
     this.canvasMajor = React.createRef();
     this.canvasMinor = React.createRef();
@@ -77,25 +77,24 @@ class Demo extends React.Component {
   }
 
   componentWillUnmount() {
+    socket.emit('disconnect', '');
+    socket.emit('COMPONENT_UNMOUNTED', 'Demo');
     this.endTick(true, 'componentWillUnmount');
   }
 
   resetBoard =async (reStart = true) => {
     await this.props.actions.gameReset();
-    /*
-    this.setState({
-      disableExit: false,
-    });
-    */
     const canvasMajor = this.canvasMajor.current;
     const canvasMinor = this.canvasMinor.current;
-    canvasMajor.focus();
-    canvasMajor.style.backgroundColor = 'black';
-    canvasMinor.style.backgroundColor = 'black';
-    // setting context so it can be accesible everywhere in the class , maybe a better way ?
-    this.canvasContextMajor = canvasMajor.getContext('2d');
-    this.canvasContextMinor = canvasMinor.getContext('2d');
-    if (this.downInterval) this.endTick(false, 'reset Board');
+    if (canvasMajor) {
+      canvasMajor.focus();
+      canvasMajor.style.backgroundColor = 'black';
+      canvasMinor.style.backgroundColor = 'black';
+      // setting context so it can be accesible everywhere in the class , maybe a better way ?
+      this.canvasContextMajor = canvasMajor.getContext('2d');
+      this.canvasContextMinor = canvasMinor.getContext('2d');
+      if (this.downInterval) this.endTick(false, 'reset Board');
+    }
     if (reStart) {
       this.startTick();
     }

@@ -11,21 +11,23 @@ const profileResponder = socketId => (
 );
 
 module.exports = (socket) => {
-  console.log(playerPool);
   socket.on(USER_CONNECTED, (user) => {
     console.log(`test log msg from client side: ${user}`);
     io.emit(USER_CONNECTED, user);
   });
-  socket.on('disconnect', () => {
-    const indexOfDisconnected = playerPool.findIndex(s => s.socketId === socket.id);
-    playerPool = [...playerPool.slice(0, indexOfDisconnected),
-      ...playerPool.slice(indexOfDisconnected + 1)];
-    io.emit('CURRENT_POOL', profileResponder(socket.id));
-    activePlayers.forEach((a) => {
-      if (a.includes(socket.id)) {
-        const opponnetId = a.filter(sIds => sIds !== socket.id)[0];
-        io.to(opponnetId).emit('GAME_DISCONNECTED', true); // winner gets true
-      }
+
+  ['disconnect', 'COMPONENT_UNMOUNTED'].forEach((ev) => {
+    socket.on(ev, () => {
+      const indexOfDisconnected = playerPool.findIndex(s => s.socketId === socket.id);
+      playerPool = [...playerPool.slice(0, indexOfDisconnected),
+        ...playerPool.slice(indexOfDisconnected + 1)];
+      io.emit('CURRENT_POOL', profileResponder(socket.id));
+      activePlayers.forEach((a) => {
+        if (a.includes(socket.id)) {
+          const opponnetId = a.filter(sIds => sIds !== socket.id)[0];
+          io.to(opponnetId).emit('GAME_DISCONNECTED', socket.id);
+        }
+      });
     });
   });
 
