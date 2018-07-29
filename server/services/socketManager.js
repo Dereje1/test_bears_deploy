@@ -1,18 +1,19 @@
 const { io } = require('../index');
 const { USER_CONNECTED, SIMULATE_GAMEPLAY } = require('../../client/src/constants');
 
-let playerPool = [];
-const activePlayers = [];
+let playerPool = []; // a list of potential players that have clicked on multiplayer
+const activePlayers = []; // an array of  2 element arrays of currently playing users
 const profileResponder = socketId => (
   { // need self socket id to segregate on client
     pool: playerPool,
     self: socketId,
   }
 );
+
 module.exports = (socket) => {
+  console.log(playerPool);
   socket.on(USER_CONNECTED, (user) => {
     console.log(`test log msg from client side: ${user}`);
-
     io.emit(USER_CONNECTED, user);
   });
   socket.on('disconnect', () => {
@@ -20,12 +21,22 @@ module.exports = (socket) => {
     playerPool = [...playerPool.slice(0, indexOfDisconnected),
       ...playerPool.slice(indexOfDisconnected + 1)];
     io.emit('CURRENT_POOL', profileResponder(socket.id));
+    activePlayers.forEach((a) => {
+      if (a.includes(socket.id)) {
+        const opponnetId = a.filter(sIds => sIds !== socket.id)[0];
+        io.to(opponnetId).emit('GAME_DISCONNECTED', true); // winner gets true
+      }
+    });
   });
-  // PLAYER_JOINED = multiplayer button click
+
+  // A New PLAYER_JOINED = multiplayer button click
   socket.on('PLAYER_JOINED', (profile) => {
-    const playerProfile = JSON.parse(profile);
-    playerProfile.socketId = socket.id; // attach socket Id to profile
-    playerPool.push(playerProfile);
+    const poolSocketIds = playerPool.map(p => p.socketId);
+    if (!poolSocketIds.includes(socket.id)) {
+      const playerProfile = JSON.parse(profile);
+      playerProfile.socketId = socket.id; // attach socket Id to profile
+      playerPool.push(playerProfile);
+    }
     io.emit('CURRENT_POOL', profileResponder(socket.id));
   });
 
