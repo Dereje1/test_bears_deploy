@@ -99,7 +99,7 @@ export const raiseFloor = (oldRubble, raiseBy = 1) => {
   const newOccupied = oldRubble.occupiedCells.map((c) => {
     const oldY = Number(c[0].split('-')[1]);
     const oldX = Number(c[0].split('-')[0]);
-    return ([`${oldX}-${oldY - 1}`, c[1]]);
+    return ([`${oldX}-${oldY - raiseBy}`, c[1]]);
   });
 
   const yBoundary = oldRubble.boundaryCells.map(c => Number(c.split('-')[1]));

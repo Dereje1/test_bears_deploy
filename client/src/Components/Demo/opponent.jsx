@@ -34,6 +34,7 @@ class Opponent extends React.Component {
 
     socket.on('CURRENT_POOL', pool => this.processPool(pool));
     socket.on('INVITATION_RECEIVED', invitedBy => this.processInvite(invitedBy));
+    socket.on('GAME_DISCONNECTED', () => this.disconnectGame());
     socket.on('START_GAME', opp => this.processGameStart(opp));
     socket.on(SIMULATE_GAMEPLAY, oppGame => this.processGame(oppGame));
     socket.on('GAME_END', win => this.processGameEnd(win));
@@ -51,10 +52,15 @@ class Opponent extends React.Component {
         this.processFloorRaise();
       }
     }
+    if (prevState.status[0] !== this.state.status[0]) {
+      if ((this.state.status[0] === 'Playing') || (this.state.status[0] === 'GameOver')) {
+        this.props.onDisableExit(true);
+      }
+    }
   }
 
   componentWillUnmount() {
-    socket.emit('REMOVE_PLAYER', this.state.selfSocketId);
+    socket.emit('disconnect', '');
   }
 
   setGame = () => {
@@ -125,6 +131,13 @@ class Opponent extends React.Component {
       playerPool: playerChoices,
       selfSocketId: this.state.selfSocketId === '' ? poolData.self : this.state.selfSocketId,
     }, () => this.setUp());
+  }
+
+  disconnectGame = () => {
+    console.log('A signal has come in that your Opponent Disconnected the Game!!');
+    // add penalty in database for this in the future
+    this.props.onGameOver(null);
+    this.props.onReset(false);
   }
 
   processInvite = (host) => {
@@ -202,6 +215,7 @@ class Opponent extends React.Component {
       if (startCounter <= 0) {
         if (databaseEntry) this.props.onGameOver(databaseEntry);
         else this.props.onGameOver(null);
+        this.props.onDisableExit(false);
         clearInterval(gameEndId);
         this.props.onReset(false);
       }
@@ -254,6 +268,7 @@ Opponent.defaultProps = {
   onSetDifficulty: null,
   onClearCanvas: null,
   onPause: null,
+  onDisableExit: null,
   difficulty: 2,
 };
 Opponent.propTypes = {
@@ -267,6 +282,7 @@ Opponent.propTypes = {
   onSetDifficulty: PropTypes.func,
   onClearCanvas: PropTypes.func,
   onPause: PropTypes.func,
+  onDisableExit: PropTypes.func,
 };
 
 export default connect(mapStateToProps)(Opponent);

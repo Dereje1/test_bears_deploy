@@ -10,7 +10,7 @@ import { faPowerOff, faPause, faPlay, faUsers, faUser } from '@fortawesome/free-
 library.add(faPowerOff, faPause, faPlay);
 
 const Controls = (props) => {
-  if (!props.multiPlayer) {
+  if (!props.multiPlayer[0]) {
     return (
       <div className="controls">
         <canvas
@@ -66,11 +66,17 @@ const Controls = (props) => {
         height={props.game.canvas.canvasMinor.height}
         tabIndex="0"
       />
-      <FontAwesomeIcon
-        className="controls__multiplayer"
-        icon={faUser}
-        onClick={props.onMultiPlayer()}
-      />
+      {
+        !props.multiPlayer[1] ?
+          <FontAwesomeIcon
+            className="controls__multiplayer"
+            icon={faUser}
+            onClick={props.onMultiPlayer()}
+          />
+          :
+          null
+      }
+
       <label htmlFor="test">Lines Cleared</label>
       <label htmlFor="test">{props.game.points.totalLinesCleared}</label>
       <label htmlFor="test">Difficulty</label>

@@ -23,6 +23,7 @@
   cursor:pointer;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   text-transform: uppercase;
+  outline: none;
 }
 
 .controls__socket{

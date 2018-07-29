@@ -44,8 +44,9 @@ class Demo extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {
+    this.state = { // holds information that the opponent component uses
       multiPlayer: false,
+      disableExit: false,
       difficulty: 2,
       selfSocketId: false,
       opponentSocketId: false, // will hold socket to emit game to
@@ -81,6 +82,11 @@ class Demo extends React.Component {
 
   resetBoard =async (reStart = true) => {
     await this.props.actions.gameReset();
+    /*
+    this.setState({
+      disableExit: false,
+    });
+    */
     const canvasMajor = this.canvasMajor.current;
     const canvasMinor = this.canvasMinor.current;
     canvasMajor.focus();
@@ -332,10 +338,10 @@ class Demo extends React.Component {
             game={this.props.game}
             difficulty={this.state.difficulty}
             socketId={this.state.selfSocketId}
+            multiPlayer={[this.state.multiPlayer, this.state.disableExit]}
             onReset={() => this.resetBoard()}
             onhandlePause={() => this.handlePause}
             onFloorRaise={() => this.floorRaise()}
-            multiPlayer={this.state.multiPlayer}
             onMultiPlayer={() => this.handleMultiplayer}
           />
           <canvas
@@ -356,6 +362,7 @@ class Demo extends React.Component {
               onClearCanvas={() => clearCanvas(this.canvasContextMajor, this.props.game)}
               onSetDifficulty={d => this.setState({ difficulty: d })}
               onGetSocketId={sId => this.setState({ selfSocketId: sId })}
+              onDisableExit={setTo => this.setState({ disableExit: setTo })}
               difficulty={this.state.difficulty}
             />
             :
